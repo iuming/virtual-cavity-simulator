@@ -50,6 +50,11 @@ jobs:
           if [ -d "web" ]; then
             cp -r web/* docs_build/
             echo "Web simulator copied to docs_build"
+            # Rename web simulator to avoid conflict
+            if [ -f "docs_build/index.html" ]; then
+              mv docs_build/index.html docs_build/simulator.html
+              echo "Web simulator moved to simulator.html"
+            fi
           else
             echo "Web directory not found, creating placeholder"
           fi
@@ -107,6 +112,9 @@ jobs:
                       <h1 class=\"display-4 fw-bold mb-4\">Virtual Cavity RF Simulator</h1>
                       <p class=\"lead mb-4\">A comprehensive Radio Frequency cavity simulation platform with advanced graphical interface for accelerator physics applications</p>
                       <div class=\"d-flex justify-content-center gap-3\">
+                          <a href=\"simulator.html\" class=\"btn btn-success btn-lg\">
+                              <i class=\"fas fa-play\"></i> Launch Web Simulator
+                          </a>
                           <a href=\"https://github.com/iuming/virtual-cavity-simulator\" class=\"btn btn-light btn-lg\">
                               <i class=\"fab fa-github\"></i> View on GitHub
                           </a>
@@ -124,6 +132,22 @@ jobs:
               <section id=\"features\" class=\"py-5\">
                   <div class=\"container\">
                       <h2 class=\"text-center mb-5\">🌟 Key Features</h2>
+                      
+                      <!-- Web Simulator Highlight -->
+                      <div class=\"row mb-5\">
+                          <div class=\"col-12\">
+                              <div class=\"card border-success shadow-lg\">
+                                  <div class=\"card-body text-center py-4\" style=\"background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;\">
+                                      <h3 class=\"card-title\">🌐 Try the Web Simulator Now!</h3>
+                                      <p class=\"card-text lead\">No installation required - Run the full RF cavity simulator in your browser</p>
+                                      <a href=\"simulator.html\" class=\"btn btn-light btn-lg\">
+                                          <i class=\"fas fa-rocket\"></i> Launch Simulator
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      
                       <div class=\"row g-4\">
                           <div class=\"col-md-6 col-lg-3\">
                               <div class=\"card h-100 feature-card border-0 shadow\">
