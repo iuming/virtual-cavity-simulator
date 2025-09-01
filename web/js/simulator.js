@@ -37,7 +37,7 @@ class CavitySimulator {
         this.beam_current = 0.008; // Beam current (A) - matching Python default
         
         // RF drive parameters
-        this.amplitude = 1.0;
+        this.amplitude = 0.01; // Reduced for reasonable power levels (~kW instead of MW)
         this.phase = 0; // degrees
         this.frequency_offset = -460; // Hz - default to resonance
         
@@ -174,15 +174,16 @@ class CavitySimulator {
         // Half bandwidth (rad/s)
         const half_bandwidth = Math.PI * this.f0 / this.Q_loaded;
         
-        // RF drive voltage (complex) - following Python sim_scav_step implementation
+        // RF drive voltage (complex) - use normalized units
         let vf_real = 0, vf_imag = 0;
         
         if (this.mode === 'cw' || (this.mode === 'pulsed' && Math.sin(2 * Math.PI * this.time * 50) > 0)) {
-            // Simplified gain factor to avoid numerical issues
-            const gain_factor = 1e6; // Direct scaling factor (1 MV)
+            // Use voltage units that produce reasonable cavity voltages (MV range)
+            // Amplitude of 1.0 should produce ~1 MV cavity voltage at steady state
+            const voltage_scale = 1e6; // 1 MV base scale
             const phase_rad = this.phase * Math.PI / 180; // Convert degrees to radians
-            vf_real = this.amplitude * gain_factor * Math.cos(phase_rad);
-            vf_imag = this.amplitude * gain_factor * Math.sin(phase_rad);
+            vf_real = this.amplitude * voltage_scale * Math.cos(phase_rad);
+            vf_imag = this.amplitude * voltage_scale * Math.sin(phase_rad);
         }
         
         // Beam loading voltage (matching Python: vb = -RL * beam_current)
@@ -219,18 +220,24 @@ class CavitySimulator {
         const vr_imag = this.vc_complex.imag - vf_imag;
         const vr_magnitude = Math.sqrt(vr_real**2 + vr_imag**2);
         
-        // Power calculations (corrected for RF cavity physics)
-        // Characteristic impedance for cavity calculations
-        const Z0 = 50; // Ohms (typical RF impedance)
+        // Power calculations with corrected units
+        // For RF cavity: P = V^2 / (2*R) where R is the effective resistance
+        // Use R/Q relationship: R = (R/Q) * Q_loaded for total cavity resistance
+        const R_cavity = this.R_over_Q * this.Q_loaded; // Total cavity resistance (Ohms)
         
-        // Forward power calculation: P = |V|^2 / Z
-        const forward_power = (vf_real**2 + vf_imag**2) / (2 * Z0 * 1000); // kW
+        // Forward power: power delivered by the RF drive
+        const vf_magnitude_squared = vf_real**2 + vf_imag**2;
+        const forward_power = vf_magnitude_squared / (2 * R_cavity) / 1000; // kW
         
-        // Reflected power: proper calculation using coupling
-        const reflected_power = (vr_real**2 + vr_imag**2) / (2 * Z0 * 1000); // kW
+        // Reflected power: power reflected due to mismatch (using already calculated vr_real, vr_imag)
+        const vr_magnitude_squared = vr_real**2 + vr_imag**2;
+        const reflected_power = vr_magnitude_squared / (2 * R_cavity) / 1000; // kW
         
-        // Cavity stored energy (proportional to |Vc|^2)
-        const stored_energy = (this.vc_complex.real**2 + this.vc_complex.imag**2) / (2 * this.RL); // Joules
+        // Cavity stored energy: U = |Vc|^2 / (2*R_cavity) * Q_loaded / ω0
+        // This gives energy in Joules
+        const vc_magnitude_squared = this.vc_complex.real**2 + this.vc_complex.imag**2;
+        const omega0 = 2 * Math.PI * this.f0;
+        const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * omega0); // Joules
         
         // Store data point
         const data_point = {

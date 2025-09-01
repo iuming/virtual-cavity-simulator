@@ -290,10 +290,11 @@ class VirtualCavityApp {
     updateSimulatorParameters() {
         const amplitude = parseFloat(this.elements.amplitudeSlider.value);
         const phase = parseFloat(this.elements.phaseSlider.value);
-        const frequency = parseFloat(this.elements.frequencySlider.value);
+        const frequency_offset = parseFloat(this.elements.frequencySlider.value);
         const beamCurrent = parseFloat(this.elements.beamCurrentSlider.value);
         
-        this.simulator.setRFParameters(amplitude, phase, frequency, beamCurrent);
+        console.log('Updating parameters:', { amplitude, phase, frequency_offset, beamCurrent });
+        this.simulator.setRFParameters(amplitude, phase, frequency_offset, beamCurrent);
     }
     
     /**
