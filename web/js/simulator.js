@@ -7,39 +7,40 @@
 
 class CavitySimulator {
     constructor() {
-        // Simulation parameters
+        // Simulation parameters (matching Python version)
         this.dt = 1e-6; // Time step (1 microsecond)
         this.f0 = 1.3e9; // Cavity resonant frequency (1.3 GHz)
         this.Q_loaded = 3e6; // Loaded quality factor
         this.R_over_Q = 1036; // R/Q value
-        this.beta = 1.0; // Coupling coefficient
+        this.beta = 1e4; // Coupling coefficient (matching Python)
+        this.RL = 0.5 * this.R_over_Q * this.Q_loaded; // Load resistance
         
         // Cavity state variables
         this.vc_complex = { real: 0, imag: 0 }; // Cavity voltage (complex)
         this.detuning = 0; // Frequency detuning (Hz)
-        this.beam_current = 0.01; // Beam current (A)
+        this.beam_current = 0.008; // Beam current (A) - matching Python default
         
         // RF drive parameters
         this.amplitude = 1.0;
         this.phase = 0; // degrees
-        this.frequency_offset = 0; // Hz
+        this.frequency_offset = -460; // Hz - default to resonance
         
-        // Mechanical resonances (microphonics)
+        // Mechanical resonances (microphonics) - matching Python version
         this.mechanical_modes = [
-            { freq: 280, Q: 100, amplitude: 1e-8 },
-            { freq: 341, Q: 150, amplitude: 0.8e-8 },
-            { freq: 460, Q: 200, amplitude: 1.2e-8 },
-            { freq: 487, Q: 180, amplitude: 0.6e-8 },
-            { freq: 618, Q: 250, amplitude: 0.9e-8 }
+            { freq: 280, Q: 40, K: 2 },
+            { freq: 341, Q: 20, K: 0.8 },
+            { freq: 460, Q: 50, K: 2 },
+            { freq: 487, Q: 80, K: 0.6 },
+            { freq: 618, Q: 100, K: 0.2 }
         ];
         
-        // Initialize mechanical oscillators
+        // Initialize mechanical oscillators (matching Python implementation)
         this.mech_states = this.mechanical_modes.map(mode => ({
-            x: 0,
-            v: 0,
+            x: 0,  // displacement
+            v: 0,  // velocity
             omega: 2 * Math.PI * mode.freq,
             gamma: mode.omega / (2 * mode.Q),
-            amplitude: mode.amplitude
+            K: mode.K // coupling strength
         }));
         
         // Simulation state
@@ -129,77 +130,81 @@ class CavitySimulator {
     }
     
     /**
-     * Single simulation step
+     * Single simulation step - matching Python LLRFLibsPy implementation
      */
     step() {
-        // Update mechanical resonances (microphonics)
+        // Update mechanical resonances (microphonics) 
         let total_mechanical_detuning = 0;
         this.mech_states.forEach((state, i) => {
             const mode = this.mechanical_modes[i];
             
-            // Simple driven harmonic oscillator
-            const force = mode.amplitude * Math.sin(state.omega * this.time);
-            const acc = -state.omega * state.omega * state.x - 2 * state.gamma * state.v + force;
+            // Mechanical oscillator with cavity voltage coupling
+            const vc_magnitude = Math.sqrt(this.vc_complex.real**2 + this.vc_complex.imag**2);
+            const force = state.K * (vc_magnitude * 1e-6)**2; // Convert to MV and apply coupling
             
+            // Update mechanical state (simple oscillator)
+            const acc = -state.omega * state.omega * state.x - 2 * state.gamma * state.v + force;
             state.v += acc * this.dt;
             state.x += state.v * this.dt;
             
-            // Convert mechanical displacement to frequency shift
-            total_mechanical_detuning += state.x * 1e6; // Scale factor
+            // Convert mechanical displacement to frequency shift (rad/s)
+            total_mechanical_detuning += state.x * 2 * Math.PI * 1000; // Scale factor
         });
         
         // Total detuning including manual offset and microphonics
-        this.detuning = this.frequency_offset + total_mechanical_detuning;
+        const dw_detuning = 2 * Math.PI * this.frequency_offset + total_mechanical_detuning;
+        this.detuning = dw_detuning / (2 * Math.PI); // Store in Hz for display
         
-        // Calculate cavity dynamics
-        const omega_0 = 2 * Math.PI * this.f0;
-        const omega_detuned = omega_0 + 2 * Math.PI * this.detuning;
-        const omega_L = 2 * Math.PI * this.f0; // RF frequency
+        // Half bandwidth (rad/s)
+        const half_bandwidth = Math.PI * this.f0 / this.Q_loaded;
         
-        // Half bandwidth
-        const half_bandwidth = omega_0 / (2 * this.Q_loaded);
-        
-        // RF drive voltage (complex)
-        let v_drive_real = 0, v_drive_imag = 0;
+        // RF drive voltage (complex) - following Python sim_scav_step implementation
+        let vf_real = 0, vf_imag = 0;
         
         if (this.mode === 'cw' || (this.mode === 'pulsed' && Math.sin(2 * Math.PI * this.time * 50) > 0)) {
-            v_drive_real = this.amplitude * Math.cos(omega_L * this.time + this.phase);
-            v_drive_imag = this.amplitude * Math.sin(omega_L * this.time + this.phase);
+            // Apply gain similar to Python version
+            const gain_factor = Math.pow(10, 20 * Math.log10(12e6) / 20.0 / 20.0); // Simplified gain
+            vf_real = this.amplitude * gain_factor * Math.cos(this.phase);
+            vf_imag = this.amplitude * gain_factor * Math.sin(this.phase);
         }
         
-        // Beam loading (simplified)
-        const beam_loading_real = -this.beam_current * this.R_over_Q * 0.5;
-        const beam_loading_imag = 0;
+        // Beam loading voltage (matching Python: vb = -RL * beam_current)
+        const vb_real = -this.RL * this.beam_current;
+        const vb_imag = 0;
         
-        // Cavity differential equation (in rotating frame)
-        // dVc/dt = -j*ω_detuning*Vc - (ω0/2Q)*Vc + (ω0/2)*V_drive - (ω0/2)*I_beam*R/Q
+        // Cavity dynamics using sim_scav_step algorithm:
+        // vc_step = (1 - Ts * (half_bw - j*dw_step)) * vc_step0 + 
+        //           2 * half_bw * Ts * (beta * vf_step / (beta + 1) + vb_step)
         
-        const detuning_term_real = -this.detuning * 2 * Math.PI * this.vc_complex.imag;
-        const detuning_term_imag = this.detuning * 2 * Math.PI * this.vc_complex.real;
+        const factor_real = 1 - this.dt * half_bandwidth;
+        const factor_imag = this.dt * dw_detuning;
         
-        const damping_real = -half_bandwidth * this.vc_complex.real;
-        const damping_imag = -half_bandwidth * this.vc_complex.imag;
+        const drive_factor = 2 * half_bandwidth * this.dt;
+        const vf_coupled_real = this.beta * vf_real / (this.beta + 1);
+        const vf_coupled_imag = this.beta * vf_imag / (this.beta + 1);
         
-        const drive_real = half_bandwidth * v_drive_real;
-        const drive_imag = half_bandwidth * v_drive_imag;
+        const drive_total_real = drive_factor * (vf_coupled_real + vb_real);
+        const drive_total_imag = drive_factor * (vf_coupled_imag + vb_imag);
         
-        const beam_real = half_bandwidth * beam_loading_real;
-        const beam_imag = half_bandwidth * beam_loading_imag;
+        // Complex multiplication: (factor_real + j*factor_imag) * (vc_real + j*vc_imag)
+        const new_vc_real = (factor_real * this.vc_complex.real + factor_imag * this.vc_complex.imag) + drive_total_real;
+        const new_vc_imag = (factor_real * this.vc_complex.imag - factor_imag * this.vc_complex.real) + drive_total_imag;
         
-        // Update cavity voltage
-        const dVc_real = detuning_term_real + damping_real + drive_real + beam_real;
-        const dVc_imag = detuning_term_imag + damping_imag + drive_imag + beam_imag;
-        
-        this.vc_complex.real += dVc_real * this.dt;
-        this.vc_complex.imag += dVc_imag * this.dt;
+        this.vc_complex.real = new_vc_real;
+        this.vc_complex.imag = new_vc_imag;
         
         // Calculate derived quantities
         const vc_magnitude = Math.sqrt(this.vc_complex.real**2 + this.vc_complex.imag**2);
         const vc_phase = Math.atan2(this.vc_complex.imag, this.vc_complex.real) * 180 / Math.PI;
         
-        // Forward and reflected power calculation
-        const forward_power = this.amplitude**2 * 1000; // kW (simplified)
-        const reflected_power = Math.abs(this.detuning) * 0.1; // kW (simplified)
+        // Reflected voltage: vr = vc - vf (matching Python)
+        const vr_real = this.vc_complex.real - vf_real;
+        const vr_imag = this.vc_complex.imag - vf_imag;
+        const vr_magnitude = Math.sqrt(vr_real**2 + vr_imag**2);
+        
+        // Power calculations (more accurate)
+        const forward_power = (vf_real**2 + vf_imag**2) / 1000; // kW
+        const reflected_power = (vr_real**2 + vr_imag**2) / 1000; // kW
         
         // Store data point
         const data_point = {

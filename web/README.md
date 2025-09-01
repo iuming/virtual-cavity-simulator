@@ -97,10 +97,21 @@ web/
 | Installation | None required | Python + dependencies |
 | Platform | Any modern browser | Windows, Linux, macOS |
 | Performance | Good (JavaScript) | Excellent (Python/NumPy) |
-| Physics Accuracy | Simplified but realistic | Full LLRFLibsPy implementation |
+| Physics Accuracy | **High (matches LLRFLibsPy core)** | Full LLRFLibsPy implementation |
 | Data Export | CSV, JSON | CSV, JSON, MATLAB |
 | Real-time Plot | Chart.js | Matplotlib |
 | Mobile Support | Yes | No |
+
+### 🔬 **Physics Accuracy Improvements (v2.0)**
+
+The Web version now closely matches the Python implementation:
+
+- **✅ Beta coupling**: `1×10⁴` (matches Python exactly)
+- **✅ Mechanical modes**: Q values `[40, 20, 50, 80, 100]` and K values `[2, 0.8, 2, 0.6, 0.2]`
+- **✅ Default parameters**: Beam current `0.008 A`, frequency offset `-460 Hz`
+- **✅ Cavity equation**: Uses `sim_scav_step` algorithm from LLRFLibsPy
+- **✅ Power calculations**: Accurate forward/reflected power computation
+- **✅ Mechanical coupling**: Voltage-dependent microphonics modeling
 
 ## Browser Compatibility
 
