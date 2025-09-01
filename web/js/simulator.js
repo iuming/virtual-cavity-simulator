@@ -36,8 +36,8 @@ class CavitySimulator {
         this.detuning = 0; // Frequency detuning (Hz)
         this.beam_current = 0.008; // Beam current (A) - matching Python default
         
-        // RF drive parameters
-        this.amplitude = 0.01; // Reduced for reasonable power levels (~kW instead of MW)
+        // RF drive parameters - MATCHING PYTHON EXAMPLE
+        this.amplitude = 1.0; // Match Python example amplitude
         this.phase = 0; // degrees
         this.frequency_offset = -460; // Hz - default to resonance
         
@@ -51,13 +51,16 @@ class CavitySimulator {
         ];
         
         // Initialize mechanical oscillators (matching Python implementation)
-        this.mech_states = this.mechanical_modes.map(mode => ({
-            x: 0,  // displacement
-            v: 0,  // velocity
-            omega: 2 * Math.PI * mode.freq,
-            gamma: mode.omega / (2 * mode.Q),
-            K: mode.K // coupling strength
-        }));
+        this.mech_states = this.mechanical_modes.map(mode => {
+            const omega = 2 * Math.PI * mode.freq;
+            return {
+                x: 0,  // displacement
+                v: 0,  // velocity
+                omega: omega,
+                gamma: omega / (2 * mode.Q), // Fixed: use calculated omega
+                K: mode.K // coupling strength
+            };
+        });
         
         // Simulation state
         this.time = 0;
@@ -171,19 +174,20 @@ class CavitySimulator {
         const dw_detuning = 2 * Math.PI * this.frequency_offset + total_mechanical_detuning;
         this.detuning = dw_detuning / (2 * Math.PI); // Store in Hz for display
         
-        // Half bandwidth (rad/s)
+        // Half bandwidth (rad/s) - MATCHING PYTHON: wh = π*f0/QL
         const half_bandwidth = Math.PI * this.f0 / this.Q_loaded;
         
-        // RF drive voltage (complex) - use normalized units
+        // RF drive voltage (complex) - MATCHING PYTHON VERSION
         let vf_real = 0, vf_imag = 0;
         
         if (this.mode === 'cw' || (this.mode === 'pulsed' && Math.sin(2 * Math.PI * this.time * 50) > 0)) {
-            // Use voltage units that produce reasonable cavity voltages (MV range)
-            // Amplitude of 1.0 should produce ~1 MV cavity voltage at steady state
-            const voltage_scale = 1e6; // 1 MV base scale
-            const phase_rad = this.phase * Math.PI / 180; // Convert degrees to radians
-            vf_real = this.amplitude * voltage_scale * Math.cos(phase_rad);
-            vf_imag = this.amplitude * voltage_scale * Math.sin(phase_rad);
+            // Python version: rf_signal = amplitude * exp(j * 2π * frequency_offset * t)
+            // Combined with phase: amplitude * exp(j * (phase + 2π * frequency_offset * t))
+            const total_phase = this.phase * Math.PI / 180 + 2 * Math.PI * this.frequency_offset * this.time;
+            
+            // Use same voltage scale as Python (internal calculation in Volts)
+            vf_real = this.amplitude * Math.cos(total_phase);
+            vf_imag = this.amplitude * Math.sin(total_phase);
         }
         
         // Beam loading voltage (matching Python: vb = -RL * beam_current)
@@ -236,7 +240,6 @@ class CavitySimulator {
         // Cavity stored energy: U = |Vc|^2 / (2*R_cavity) * Q_loaded / ω0
         // This gives energy in Joules
         const vc_magnitude_squared = this.vc_complex.real**2 + this.vc_complex.imag**2;
-        const omega0 = 2 * Math.PI * this.f0;
         const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * omega0); // Joules
         
         // Store data point
