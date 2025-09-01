@@ -177,13 +177,22 @@ class CavitySimulator {
         // Half bandwidth (rad/s) - MATCHING PYTHON: wh = π*f0/QL
         const half_bandwidth = Math.PI * this.f0 / this.Q_loaded;
         
-        // RF drive voltage (complex) - MATCHING PYTHON VERSION
+        // RF drive voltage (complex) - CORRECTED PYTHON MATCHING
         let vf_real = 0, vf_imag = 0;
         
         if (this.mode === 'cw' || (this.mode === 'pulsed' && Math.sin(2 * Math.PI * this.time * 50) > 0)) {
-            // Python version: rf_signal = amplitude * exp(j * 2π * frequency_offset * t)
-            // Combined with phase: amplitude * exp(j * (phase + 2π * frequency_offset * t))
-            const total_phase = this.phase * Math.PI / 180 + 2 * Math.PI * this.frequency_offset * this.time;
+            // Python version separates static phase from frequency offset:
+            // 1. rf_signal = amplitude * exp(j * 2π * frequency_offset * t)  
+            // 2. Apply additional static phase
+            
+            // First apply frequency offset (time-dependent)
+            const freq_phase = 2 * Math.PI * this.frequency_offset * this.time;
+            
+            // Then apply static phase setting
+            const static_phase = this.phase * Math.PI / 180;
+            
+            // Total phase
+            const total_phase = static_phase + freq_phase;
             
             // Use same voltage scale as Python (internal calculation in Volts)
             vf_real = this.amplitude * Math.cos(total_phase);
@@ -209,8 +218,9 @@ class CavitySimulator {
         const drive_total_imag = drive_factor * (vf_coupled_imag + vb_imag);
         
         // Complex multiplication: (factor_real + j*factor_imag) * (vc_real + j*vc_imag)
-        const new_vc_real = (factor_real * this.vc_complex.real + factor_imag * this.vc_complex.imag) + drive_total_real;
-        const new_vc_imag = (factor_real * this.vc_complex.imag - factor_imag * this.vc_complex.real) + drive_total_imag;
+        // Standard formula: (a + jb)(c + jd) = (ac - bd) + j(ad + bc)
+        const new_vc_real = (factor_real * this.vc_complex.real - factor_imag * this.vc_complex.imag) + drive_total_real;
+        const new_vc_imag = (factor_real * this.vc_complex.imag + factor_imag * this.vc_complex.real) + drive_total_imag;
         
         this.vc_complex.real = new_vc_real;
         this.vc_complex.imag = new_vc_imag;
