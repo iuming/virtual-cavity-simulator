@@ -79,7 +79,7 @@ class CavitySimulator {
      */
     setRFParameters(amplitude, phase, frequency_offset, beam_current) {
         this.amplitude = amplitude;
-        this.phase = phase * Math.PI / 180; // Convert to radians
+        this.phase = phase; // Keep in degrees
         this.frequency_offset = frequency_offset;
         this.beam_current = beam_current;
     }
