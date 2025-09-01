@@ -14,13 +14,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
+  python-version: [3.8, 3.9, '3.10', '3.11']
         exclude:
           # Reduce matrix size for efficiency
-          - os: macos-latest
-            python-version: 3.7
-          - os: windows-latest
-            python-version: 3.7
+          # Python 3.7 removed due to lack of support on Ubuntu 24.04
 
     steps:
     - uses: actions/checkout@v3
@@ -128,7 +125,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+  uses: actions/upload-artifact@v4
       with:
         name: security-reports
         path: |
@@ -200,7 +197,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload documentation
-      uses: actions/upload-artifact@v3
+  uses: actions/upload-artifact@v4
       with:
         name: documentation
         path: docs/_build/html/
