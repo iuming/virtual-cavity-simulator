@@ -176,9 +176,13 @@ class CavitySimulator {
             total_mechanical_detuning += state.x * 2 * Math.PI * 1000; // Scale factor
         });
         
-        // Total detuning including manual offset and microphonics
-        const dw_detuning = 2 * Math.PI * this.frequency_offset + total_mechanical_detuning;
-        this.detuning = dw_detuning / (2 * Math.PI); // Store in Hz for display
+        // IMPORTANT DISTINCTION (fixed concept confusion):
+        // - frequency_offset: RF source frequency offset (user controlled input)
+        // - detuning: Cavity actual detuning (simulation result, includes mechanical effects)
+        
+        // Cavity detuning is from mechanical effects only (this is what gets displayed as "Detuning")
+        const cavity_detuning_rad = total_mechanical_detuning;
+        this.detuning = cavity_detuning_rad / (2 * Math.PI); // Store in Hz for display
         
         // Half bandwidth (rad/s) - MATCHING PYTHON: wh = π*f0/QL
         const half_bandwidth = Math.PI * this.f0 / this.Q_loaded;
@@ -219,8 +223,10 @@ class CavitySimulator {
         // vc_step = (1 - Ts * (half_bw - j*dw_step)) * vc_step0 + 
         //           2 * half_bw * Ts * (beta * vf_step / (beta + 1) + vb_step)
         
+        // CORRECTED: Use only cavity detuning (mechanical effects) in cavity dynamics
+        // RF frequency offset is already handled in RF signal generation above
         const factor_real = 1 - this.dt * half_bandwidth;
-        const factor_imag = this.dt * dw_detuning;
+        const factor_imag = this.dt * cavity_detuning_rad; // Use cavity detuning, not total
         
         const drive_factor = 2 * half_bandwidth * this.dt;
         const vf_coupled_real = this.beta * vf_real / (this.beta + 1);
