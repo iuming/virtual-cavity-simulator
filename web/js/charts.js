@@ -1,14 +1,27 @@
 /**
- * Virtual Cavity RF Simulator - Chart Management
+ * Virtual Cavity RF Simulator - Chart Management System
  * 
- * Handles all chart creation, updates, and data visualization
- * using Chart.js for real-time plotting.
+ * @fileoverview Comprehensive chart management for RF cavity simulation visualization
+ * @author Ming Liu
+ * @version 2.0.0
+ * @since 2025-09-01
+ * 
+ * @description This module handles all chart creation, updates, and data visualization
+ * using Chart.js for real-time plotting with separate charts for each parameter.
+ * Features include:
+ * - Independent charts for voltage, power, detuning, and beam parameters
+ * - Real-time data updates with configurable buffer sizes
+ * - Dual-axis support for related but different-scale parameters
+ * - Automatic chart scaling and legend management
+ * 
+ * @requires Chart.js v3.x or higher
+ * @requires chartjs-adapter-date-fns for time scale support
  */
 
 class ChartManager {
     constructor() {
         this.charts = {};
-        this.dataBufferSize = 500; // Number of points to display
+        this.dataBufferSize = 300; // Number of points to display
         this.updateInterval = 100; // ms
         
         // Color scheme
@@ -29,135 +42,24 @@ class ChartManager {
      */
     initializeCharts() {
         // Check if DOM elements exist before creating charts
-        const mainChartElement = document.getElementById('mainChart');
         const voltageChartElement = document.getElementById('voltageChart');
-        const reflectedChartElement = document.getElementById('reflectedChart');
+        const powerChartElement = document.getElementById('powerChart');
+        const detuningChartElement = document.getElementById('detuningChart');
+        const beamChartElement = document.getElementById('beamChart');
         
-        if (!mainChartElement || !voltageChartElement || !reflectedChartElement) {
+        if (!voltageChartElement || !powerChartElement || !detuningChartElement || !beamChartElement) {
             console.error('Chart elements not found in DOM');
             throw new Error('Required chart canvas elements not found');
         }
         
-        this.createMainChart();
         this.createVoltageChart();
-        this.createReflectedChart();
+        this.createPowerChart();
+        this.createDetuningChart();
+        this.createBeamChart();
     }
     
     /**
-     * Create main real-time chart
-     */
-    createMainChart() {
-        const ctx = document.getElementById('mainChart');
-        if (!ctx) {
-            console.error('mainChart element not found');
-            return;
-        }
-        
-        this.charts.main = new Chart(ctx.getContext('2d'), {
-            type: 'line',
-            data: {
-                datasets: [
-                    {
-                        label: 'Cavity Voltage (MV)',
-                        data: [],
-                        borderColor: this.colors.primary,
-                        backgroundColor: this.colors.primary + '20',
-                        tension: 0.1,
-                        pointRadius: 0,
-                        yAxisID: 'y'
-                    },
-                    {
-                        label: 'Detuning (Hz)',
-                        data: [],
-                        borderColor: this.colors.info,
-                        backgroundColor: this.colors.info + '20',
-                        tension: 0.1,
-                        pointRadius: 0,
-                        yAxisID: 'y1'
-                    },
-                    {
-                        label: 'Forward Power (kW)',
-                        data: [],
-                        borderColor: this.colors.success,
-                        backgroundColor: this.colors.success + '20',
-                        tension: 0.1,
-                        pointRadius: 0,
-                        yAxisID: 'y2'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Real-time Cavity Response'
-                    },
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    x: {
-                        type: 'linear',
-                        title: {
-                            display: true,
-                            text: 'Time (s)'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(4);
-                            }
-                        }
-                    },
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Cavity Voltage (MV)',
-                            color: this.colors.primary
-                        },
-                        ticks: {
-                            color: this.colors.primary
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Detuning (Hz)',
-                            color: this.colors.info
-                        },
-                        ticks: {
-                            color: this.colors.info
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    },
-                    y2: {
-                        type: 'linear',
-                        display: false,
-                        position: 'right'
-                    }
-                }
-            }
-        });
-    }
-    
-    /**
-     * Create voltage magnitude and phase chart
+     * Create voltage chart (magnitude and phase)
      */
     createVoltageChart() {
         const ctx = document.getElementById('voltageChart');
@@ -171,21 +73,19 @@ class ChartManager {
             data: {
                 datasets: [
                     {
-                        label: 'Magnitude (MV)',
+                        label: 'Voltage Magnitude (MV)',
                         data: [],
                         borderColor: this.colors.primary,
                         backgroundColor: this.colors.primary + '20',
                         tension: 0.1,
-                        pointRadius: 0,
                         yAxisID: 'y'
                     },
                     {
-                        label: 'Phase (deg)',
+                        label: 'Voltage Phase (°)',
                         data: [],
-                        borderColor: this.colors.warning,
-                        backgroundColor: this.colors.warning + '20',
+                        borderColor: this.colors.secondary,
+                        backgroundColor: this.colors.secondary + '20',
                         tension: 0.1,
-                        pointRadius: 0,
                         yAxisID: 'y1'
                     }
                 ]
@@ -193,23 +93,17 @@ class ChartManager {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false,
                 interaction: {
+                    mode: 'index',
                     intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
                 },
                 scales: {
                     x: {
                         type: 'linear',
+                        position: 'bottom',
                         title: {
                             display: true,
-                            text: 'Time (s)'
+                            text: 'Time (μs)'
                         }
                     },
                     y: {
@@ -218,9 +112,12 @@ class ChartManager {
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Magnitude (MV)',
+                            text: 'Voltage Magnitude (MV)',
                             color: this.colors.primary
-                        }
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
                     },
                     y1: {
                         type: 'linear',
@@ -228,12 +125,19 @@ class ChartManager {
                         position: 'right',
                         title: {
                             display: true,
-                            text: 'Phase (deg)',
-                            color: this.colors.warning
+                            text: 'Phase (°)',
+                            color: this.colors.secondary
                         },
                         grid: {
-                            drawOnChartArea: false
-                        }
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
                     }
                 }
             }
@@ -241,194 +145,318 @@ class ChartManager {
     }
     
     /**
-     * Create reflected power chart
+     * Create power chart (forward and reflected)
      */
-    createReflectedChart() {
-        const ctx = document.getElementById('reflectedChart');
+    createPowerChart() {
+        const ctx = document.getElementById('powerChart');
         if (!ctx) {
-            console.error('reflectedChart element not found');
+            console.error('powerChart element not found');
             return;
         }
         
-        this.charts.reflected = new Chart(ctx.getContext('2d'), {
+        this.charts.power = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
                 datasets: [
+                    {
+                        label: 'Forward Power (kW)',
+                        data: [],
+                        borderColor: this.colors.success,
+                        backgroundColor: this.colors.success + '20',
+                        tension: 0.1
+                    },
                     {
                         label: 'Reflected Power (kW)',
                         data: [],
                         borderColor: this.colors.danger,
                         backgroundColor: this.colors.danger + '20',
-                        tension: 0.1,
-                        pointRadius: 0,
-                        fill: true
+                        tension: 0.1
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false,
                 interaction: {
+                    mode: 'index',
                     intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
                 },
                 scales: {
                     x: {
                         type: 'linear',
+                        position: 'bottom',
                         title: {
                             display: true,
-                            text: 'Time (s)'
+                            text: 'Time (μs)'
                         }
                     },
                     y: {
-                        type: 'linear',
                         title: {
                             display: true,
                             text: 'Power (kW)'
                         },
                         beginAtZero: true
                     }
+                },
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
                 }
             }
         });
     }
     
     /**
-     * Update all charts with new data point
+     * Create detuning chart
      */
-    updateCharts(dataPoint) {
-        const timePoint = { x: dataPoint.time, y: dataPoint.vc_magnitude };
-        const detuningPoint = { x: dataPoint.time, y: dataPoint.detuning };
-        const forwardPowerPoint = { x: dataPoint.time, y: dataPoint.forward_power };
-        const phasePoint = { x: dataPoint.time, y: dataPoint.vc_phase };
-        const reflectedPoint = { x: dataPoint.time, y: dataPoint.reflected_power };
+    createDetuningChart() {
+        const ctx = document.getElementById('detuningChart');
+        if (!ctx) {
+            console.error('detuningChart element not found');
+            return;
+        }
         
-        // Update main chart
-        this.addDataPoint(this.charts.main, 0, timePoint);
-        this.addDataPoint(this.charts.main, 1, detuningPoint);
-        this.addDataPoint(this.charts.main, 2, forwardPowerPoint);
-        
-        // Update voltage chart
-        this.addDataPoint(this.charts.voltage, 0, timePoint);
-        this.addDataPoint(this.charts.voltage, 1, phasePoint);
-        
-        // Update reflected power chart
-        this.addDataPoint(this.charts.reflected, 0, reflectedPoint);
-        
-        // Update chart displays
-        this.charts.main.update('none');
-        this.charts.voltage.update('none');
-        this.charts.reflected.update('none');
+        this.charts.detuning = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Detuning Frequency (Hz)',
+                        data: [],
+                        borderColor: this.colors.info,
+                        backgroundColor: this.colors.info + '20',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (μs)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Detuning (Hz)'
+                        }
+                    }
+                },
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
     }
     
     /**
-     * Add data point to specific dataset
+     * Create beam current and stored energy chart
      */
-    addDataPoint(chart, datasetIndex, point) {
-        const dataset = chart.data.datasets[datasetIndex];
-        dataset.data.push(point);
+    createBeamChart() {
+        const ctx = document.getElementById('beamChart');
+        if (!ctx) {
+            console.error('beamChart element not found');
+            return;
+        }
         
-        // Limit buffer size
-        if (dataset.data.length > this.dataBufferSize) {
-            dataset.data.shift();
+        this.charts.beam = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Beam Current (mA)',
+                        data: [],
+                        borderColor: this.colors.success,
+                        backgroundColor: this.colors.success + '20',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Stored Energy (J)',
+                        data: [],
+                        borderColor: this.colors.warning,
+                        backgroundColor: this.colors.warning + '20',
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'Time (μs)'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Beam Current (mA)',
+                            color: this.colors.success
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Stored Energy (J)',
+                            color: this.colors.warning
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                animation: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
+     * Update all charts with new data
+     */
+    updateCharts(dataPoint) {
+        const time_us = dataPoint.time * 1e6; // Convert to microseconds
+        
+        // Update voltage chart
+        if (this.charts.voltage) {
+            this.charts.voltage.data.datasets[0].data.push({
+                x: time_us,
+                y: dataPoint.vc_magnitude
+            });
+            this.charts.voltage.data.datasets[1].data.push({
+                x: time_us,
+                y: dataPoint.vc_phase
+            });
+            
+            // Limit data points
+            if (this.charts.voltage.data.datasets[0].data.length > this.dataBufferSize) {
+                this.charts.voltage.data.datasets[0].data.shift();
+                this.charts.voltage.data.datasets[1].data.shift();
+            }
+            
+            this.charts.voltage.update('none');
+        }
+        
+        // Update power chart
+        if (this.charts.power) {
+            this.charts.power.data.datasets[0].data.push({
+                x: time_us,
+                y: dataPoint.forward_power
+            });
+            this.charts.power.data.datasets[1].data.push({
+                x: time_us,
+                y: dataPoint.reflected_power
+            });
+            
+            // Limit data points
+            if (this.charts.power.data.datasets[0].data.length > this.dataBufferSize) {
+                this.charts.power.data.datasets[0].data.shift();
+                this.charts.power.data.datasets[1].data.shift();
+            }
+            
+            this.charts.power.update('none');
+        }
+        
+        // Update detuning chart
+        if (this.charts.detuning) {
+            this.charts.detuning.data.datasets[0].data.push({
+                x: time_us,
+                y: dataPoint.detuning
+            });
+            
+            // Limit data points
+            if (this.charts.detuning.data.datasets[0].data.length > this.dataBufferSize) {
+                this.charts.detuning.data.datasets[0].data.shift();
+            }
+            
+            this.charts.detuning.update('none');
+        }
+        
+        // Update beam chart
+        if (this.charts.beam) {
+            this.charts.beam.data.datasets[0].data.push({
+                x: time_us,
+                y: dataPoint.beam_current
+            });
+            this.charts.beam.data.datasets[1].data.push({
+                x: time_us,
+                y: dataPoint.stored_energy
+            });
+            
+            // Limit data points
+            if (this.charts.beam.data.datasets[0].data.length > this.dataBufferSize) {
+                this.charts.beam.data.datasets[0].data.shift();
+                this.charts.beam.data.datasets[1].data.shift();
+            }
+            
+            this.charts.beam.update('none');
         }
     }
     
     /**
-     * Clear all chart data
+     * Clear all charts
      */
     clearCharts() {
         Object.values(this.charts).forEach(chart => {
-            chart.data.datasets.forEach(dataset => {
-                dataset.data = [];
-            });
-            chart.update();
-        });
-    }
-    
-    /**
-     * Set autoscale for all charts
-     */
-    setAutoscale(enabled) {
-        Object.values(this.charts).forEach(chart => {
-            Object.keys(chart.options.scales).forEach(scaleKey => {
-                if (scaleKey !== 'x') {
-                    if (enabled) {
-                        delete chart.options.scales[scaleKey].min;
-                        delete chart.options.scales[scaleKey].max;
-                    }
-                }
-            });
-            chart.update();
-        });
-    }
-    
-    /**
-     * Update chart time range
-     */
-    updateTimeRange(minTime, maxTime) {
-        Object.values(this.charts).forEach(chart => {
-            chart.options.scales.x.min = minTime;
-            chart.options.scales.x.max = maxTime;
-            chart.update('none');
-        });
-    }
-    
-    /**
-     * Resize charts (useful for responsive layouts)
-     */
-    resizeCharts() {
-        Object.values(this.charts).forEach(chart => {
-            chart.resize();
-        });
-    }
-    
-    /**
-     * Get chart screenshot as base64 image
-     */
-    getChartImage(chartName) {
-        if (this.charts[chartName]) {
-            return this.charts[chartName].toBase64Image();
-        }
-        return null;
-    }
-    
-    /**
-     * Set chart theme (light/dark)
-     */
-    setTheme(theme) {
-        const gridColor = theme === 'dark' ? '#444' : '#e0e0e0';
-        const textColor = theme === 'dark' ? '#fff' : '#333';
-        
-        Object.values(this.charts).forEach(chart => {
-            // Update grid colors
-            Object.keys(chart.options.scales).forEach(scaleKey => {
-                chart.options.scales[scaleKey].grid.color = gridColor;
-                chart.options.scales[scaleKey].ticks.color = textColor;
-                if (chart.options.scales[scaleKey].title) {
-                    chart.options.scales[scaleKey].title.color = textColor;
-                }
-            });
-            
-            // Update plugins
-            if (chart.options.plugins.title) {
-                chart.options.plugins.title.color = textColor;
+            if (chart && chart.data && chart.data.datasets) {
+                chart.data.datasets.forEach(dataset => {
+                    dataset.data = [];
+                });
+                chart.update();
             }
-            if (chart.options.plugins.legend) {
-                chart.options.plugins.legend.labels.color = textColor;
-            }
-            
-            chart.update();
         });
+    }
+    
+    /**
+     * Destroy all charts
+     */
+    destroy() {
+        Object.values(this.charts).forEach(chart => {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        });
+        this.charts = {};
     }
 }
-
-// Make available globally
-window.ChartManager = ChartManager;

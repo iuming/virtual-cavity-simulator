@@ -158,81 +158,105 @@
             <!-- Visualization Area -->
             <div class="col-lg-9">
                 <div class="row">
-                    <!-- Main Plot -->
-                    <div class="col-12 mb-3">
+                    <!-- Cavity Voltage Chart -->
+                    <div class="col-lg-6 mb-3">
                         <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">Real-time Cavity Response</h6>
-                                <div class="form-check form-switch float-end">
-                                    <input class="form-check-input" type="checkbox" id="autoscaleSwitch" checked>
-                                    <label class="form-check-label" for="autoscaleSwitch">Autoscale</label>
-                                </div>
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="fas fa-bolt"></i> Cavity Voltage (Magnitude & Phase)</h6>
                             </div>
                             <div class="card-body">
-                                <canvas id="mainChart" style="width: 100%; height: 400px;"></canvas>
+                                <canvas id="voltageChart" style="width: 100%; height: 300px;"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Secondary Plots -->
-                    <div class="col-md-6 mb-3">
+                    <!-- Power Chart -->
+                    <div class="col-lg-6 mb-3">
                         <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">Cavity Voltage (Magnitude & Phase)</h6>
+                            <div class="card-header bg-warning text-white">
+                                <h6 class="mb-0"><i class="fas fa-tachometer-alt"></i> Power (Forward & Reflected)</h6>
                             </div>
                             <div class="card-body">
-                                <canvas id="voltageChart" style="width: 100%; height: 250px;"></canvas>
+                                <canvas id="powerChart" style="width: 100%; height: 300px;"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <!-- Detuning Chart -->
+                    <div class="col-lg-6 mb-3">
                         <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">Reflected Power</h6>
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="fas fa-wave-square"></i> Detuning Frequency</h6>
                             </div>
                             <div class="card-body">
-                                <canvas id="reflectedChart" style="width: 100%; height: 250px;"></canvas>
+                                <canvas id="detuningChart" style="width: 100%; height: 300px;"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Parameter Display -->
+                    <!-- Beam Chart -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="fas fa-battery-three-quarters"></i> Beam Current & Energy</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="beamChart" style="width: 100%; height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Parameter Display -->
+                <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">Real-time Parameters</h6>
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Real-time Parameters</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row text-center">
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-2">
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
                                             <small class="text-muted">Cavity Voltage</small>
-                                            <div class="h5 text-primary" id="cavityVoltageDisplay">0.0 MV</div>
+                                            <div class="h6 text-primary" id="cavityVoltageDisplay">0.0 MV</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-2">
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
                                             <small class="text-muted">Forward Power</small>
-                                            <div class="h5 text-success" id="forwardPowerDisplay">0.0 kW</div>
+                                            <div class="h6 text-success" id="forwardPowerDisplay">0.0 kW</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-2">
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
                                             <small class="text-muted">Reflected Power</small>
-                                            <div class="h5 text-warning" id="reflectedPowerDisplay">0.0 kW</div>
+                                            <div class="h6 text-warning" id="reflectedPowerDisplay">0.0 kW</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="border rounded p-2">
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
                                             <small class="text-muted">Detuning</small>
-                                            <div class="h5 text-info" id="detuningDisplay">0.0 Hz</div>
+                                            <div class="h6 text-info" id="detuningDisplay">0.0 Hz</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
+                                            <small class="text-muted">Beam Current</small>
+                                            <div class="h6 text-success" id="beamCurrentDisplay">0.0 mA</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="border rounded p-2 bg-light">
+                                            <small class="text-muted">Cavity Phase</small>
+                                            <div class="h6 text-secondary" id="cavityPhaseDisplay">0.0°</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

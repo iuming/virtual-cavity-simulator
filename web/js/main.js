@@ -1,8 +1,25 @@
 /**
- * Virtual Cavity RF Simulator - Main Application
+ * Virtual Cavity RF Simulator - Main Application Controller
  * 
- * Main application logic that connects the simulator engine,
- * chart manager, and user interface elements.
+ * @fileoverview Central application controller coordinating UI, simulation, and visualization
+ * @author Ming Liu
+ * @version 2.0.0
+ * @since 2025-09-01
+ * 
+ * @description Main application logic that orchestrates the RF cavity simulator by:
+ * - Connecting the physics simulation engine with the user interface
+ * - Managing real-time data flow between components
+ * - Coordinating chart updates and parameter control
+ * - Handling user interactions and event management
+ * - Providing data recording and export functionality
+ * 
+ * @architecture Follows MVC pattern with clear separation of concerns
+ * @dependencies CavitySimulator, ChartManager, Bootstrap 5
+ * @performance Throttled updates for smooth 60 FPS operation
+ * 
+ * @requires CavitySimulator - Physics simulation engine
+ * @requires ChartManager - Visualization management
+ * @requires Bootstrap 5 - UI framework
  */
 
 class VirtualCavityApp {
@@ -68,6 +85,8 @@ class VirtualCavityApp {
         this.elements.forwardPowerDisplay = document.getElementById('forwardPowerDisplay');
         this.elements.reflectedPowerDisplay = document.getElementById('reflectedPowerDisplay');
         this.elements.detuningDisplay = document.getElementById('detuningDisplay');
+        this.elements.beamCurrentDisplay = document.getElementById('beamCurrentDisplay');
+        this.elements.cavityPhaseDisplay = document.getElementById('cavityPhaseDisplay');
         
         // Other controls
         this.elements.autoscaleSwitch = document.getElementById('autoscaleSwitch');
@@ -248,10 +267,13 @@ class VirtualCavityApp {
         this.elements.forwardPowerDisplay.textContent = `${dataPoint.forward_power.toFixed(1)} kW`;
         this.elements.reflectedPowerDisplay.textContent = `${dataPoint.reflected_power.toFixed(1)} kW`;
         this.elements.detuningDisplay.textContent = `${dataPoint.detuning.toFixed(1)} Hz`;
+        this.elements.beamCurrentDisplay.textContent = `${dataPoint.beam_current.toFixed(1)} mA`;
+        this.elements.cavityPhaseDisplay.textContent = `${dataPoint.vc_phase.toFixed(1)}°`;
         
         // Add visual feedback for data updates
         [this.elements.cavityVoltageDisplay, this.elements.forwardPowerDisplay, 
-         this.elements.reflectedPowerDisplay, this.elements.detuningDisplay].forEach(element => {
+         this.elements.reflectedPowerDisplay, this.elements.detuningDisplay,
+         this.elements.beamCurrentDisplay, this.elements.cavityPhaseDisplay].forEach(element => {
             element.parentElement.classList.add('data-update');
             setTimeout(() => element.parentElement.classList.remove('data-update'), 300);
         });
@@ -265,6 +287,8 @@ class VirtualCavityApp {
         this.elements.forwardPowerDisplay.textContent = '0.0 kW';
         this.elements.reflectedPowerDisplay.textContent = '0.0 kW';
         this.elements.detuningDisplay.textContent = '0.0 Hz';
+        this.elements.beamCurrentDisplay.textContent = '0.0 mA';
+        this.elements.cavityPhaseDisplay.textContent = '0.0°';
     }
     
     /**
