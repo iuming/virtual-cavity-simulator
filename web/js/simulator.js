@@ -42,6 +42,9 @@ class CavitySimulator {
         this.detuning = 0; // Frequency detuning (Hz)
         this.beam_current = 0.008; // Beam current (A) - matching Python default
         
+        // Random number generation for microphonics (Box-Muller for Gaussian)
+        this.spare_gaussian = null;
+        
         // RF drive parameters - MATCHING PYTHON EXAMPLE
         this.amplitude = 1.0; // Match Python example amplitude
         this.phase = 0; // degrees
@@ -81,6 +84,23 @@ class CavitySimulator {
         // Callbacks
         this.onDataUpdate = null;
         this.onStatusUpdate = null;
+    }
+    
+    /**
+     * Generate Gaussian random number (matching Python's randn())
+     */
+    randn() {
+        if (this.spare_gaussian !== null) {
+            const temp = this.spare_gaussian;
+            this.spare_gaussian = null;
+            return temp;
+        }
+        
+        const u = Math.random();
+        const v = Math.random();
+        const mag = Math.sqrt(-2.0 * Math.log(u));
+        this.spare_gaussian = mag * Math.cos(2.0 * Math.PI * v);
+        return mag * Math.sin(2.0 * Math.PI * v);
     }
     
     /**
@@ -158,30 +178,13 @@ class CavitySimulator {
      * Single simulation step - matching Python LLRFLibsPy implementation
      */
     step() {
-        // Update mechanical resonances (microphonics) 
-        let total_mechanical_detuning = 0;
-        this.mech_states.forEach((state, i) => {
-            const mode = this.mechanical_modes[i];
-            
-            // Mechanical oscillator with cavity voltage coupling
-            const vc_magnitude = Math.sqrt(this.vc_complex.real**2 + this.vc_complex.imag**2);
-            const force = state.K * (vc_magnitude * 1e-6)**2; // Convert to MV and apply coupling
-            
-            // Update mechanical state (simple oscillator)
-            const acc = -state.omega * state.omega * state.x - 2 * state.gamma * state.v + force;
-            state.v += acc * this.dt;
-            state.x += state.v * this.dt;
-            
-            // Convert mechanical displacement to frequency shift (rad/s)
-            total_mechanical_detuning += state.x * 2 * Math.PI * 1000; // Scale factor
-        });
+        // Update time
+        this.time += this.dt;
         
-        // IMPORTANT DISTINCTION (fixed concept confusion):
-        // - frequency_offset: RF source frequency offset (user controlled input)
-        // - detuning: Cavity actual detuning (simulation result, includes mechanical effects)
-        
-        // Cavity detuning is from mechanical effects only (this is what gets displayed as "Detuning")
-        const cavity_detuning_rad = total_mechanical_detuning;
+        // SIMPLIFIED MICROPHONICS: Match Python exactly
+        // Python: dw_micr = 2.0 * np.pi * np.random.randn() * 10
+        const dw_micr = 2.0 * Math.PI * this.randn() * 10;
+        const cavity_detuning_rad = dw_micr;
         this.detuning = cavity_detuning_rad / (2 * Math.PI); // Store in Hz for display
         
         // Half bandwidth (rad/s) - MATCHING PYTHON: wh = π*f0/QL
@@ -235,6 +238,10 @@ class CavitySimulator {
         const drive_total_real = drive_factor * (vf_coupled_real + vb_real);
         const drive_total_imag = drive_factor * (vf_coupled_imag + vb_imag);
         
+        // CRITICAL: Store old cavity voltage for reflected voltage calculation
+        const old_vc_real = this.vc_complex.real;
+        const old_vc_imag = this.vc_complex.imag;
+        
         // Complex multiplication: (factor_real + j*factor_imag) * (vc_real + j*vc_imag)
         // Standard formula: (a + jb)(c + jd) = (ac - bd) + j(ad + bc)
         const new_vc_real = (factor_real * this.vc_complex.real - factor_imag * this.vc_complex.imag) + drive_total_real;
@@ -247,9 +254,10 @@ class CavitySimulator {
         const vc_magnitude = Math.sqrt(this.vc_complex.real**2 + this.vc_complex.imag**2);
         const vc_phase = Math.atan2(this.vc_complex.imag, this.vc_complex.real) * 180 / Math.PI;
         
-        // Reflected voltage: vr = vc - vf (matching Python)
-        const vr_real = this.vc_complex.real - vf_real;
-        const vr_imag = this.vc_complex.imag - vf_imag;
+        // Reflected voltage: vr = vc_old - vf (CORRECTED: matching Python exactly)
+        // Python: vr = state_vc - vf_step (uses OLD cavity voltage before update)
+        const vr_real = old_vc_real - vf_real;
+        const vr_imag = old_vc_imag - vf_imag;
         const vr_magnitude = Math.sqrt(vr_real**2 + vr_imag**2);
         
         // Power calculations with corrected units
