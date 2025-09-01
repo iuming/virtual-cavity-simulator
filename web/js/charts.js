@@ -47,21 +47,32 @@ class ChartManager {
         const detuningChartElement = document.getElementById('detuningChart');
         const beamChartElement = document.getElementById('beamChart');
         
-        const missingElements = [];
-        if (!voltageChartElement) missingElements.push('voltageChart');
-        if (!powerChartElement) missingElements.push('powerChart');
-        if (!detuningChartElement) missingElements.push('detuningChart');
-        if (!beamChartElement) missingElements.push('beamChart');
-        
-        if (missingElements.length > 0) {
-            console.error('Chart elements not found in DOM:', missingElements);
-            throw new Error(`Required chart canvas elements not found: ${missingElements.join(', ')}`);
+        // Create charts only if corresponding DOM elements exist
+        if (voltageChartElement) {
+            this.createVoltageChart();
+        } else {
+            console.warn('voltageChart element not found - voltage chart will not be available');
         }
         
-        this.createVoltageChart();
-        this.createPowerChart();
-        this.createDetuningChart();
-        this.createBeamChart();
+        if (powerChartElement) {
+            this.createPowerChart();
+        } else {
+            console.warn('powerChart element not found - power chart will not be available');
+        }
+        
+        if (detuningChartElement) {
+            this.createDetuningChart();
+        } else {
+            console.warn('detuningChart element not found - detuning chart will not be available');
+        }
+        
+        if (beamChartElement) {
+            this.createBeamChart();
+        } else {
+            console.warn('beamChart element not found - beam chart will not be available');
+        }
+        
+        console.log('Charts initialized:', Object.keys(this.charts));
     }
     
     /**
