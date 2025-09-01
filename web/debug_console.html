@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Console</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        #console { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; background: #f5f5f5; }
+        .error { color: red; }
+        .warning { color: orange; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔍 JavaScript Error Debug Console</h1>
+    <button onclick="testSimulator()">Test Simulator Loading</button>
+    <button onclick="testMain()">Test Main App Loading</button>
+    <button onclick="clearConsole()">Clear</button>
+    
+    <div id="console"></div>
+    
+    <script>
+        const consoleDiv = document.getElementById('console');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(div);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        function clearConsole() {
+            consoleDiv.innerHTML = '';
+        }
+        
+        // Capture all console messages
+        const originalConsole = {
+            log: console.log,
+            error: console.error,
+            warn: console.warn
+        };
+        
+        console.log = function(...args) {
+            log('LOG: ' + args.join(' '), 'info');
+            originalConsole.log.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            log('ERROR: ' + args.join(' '), 'error');
+            originalConsole.error.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            log('WARN: ' + args.join(' '), 'warning');
+            originalConsole.warn.apply(console, args);
+        };
+        
+        // Capture unhandled errors
+        window.addEventListener('error', function(e) {
+            log(`UNCAUGHT ERROR: ${e.message} at ${e.filename}:${e.lineno}`, 'error');
+        });
+        
+        function testSimulator() {
+            log('Testing simulator.js loading...', 'info');
+            try {
+                const script = document.createElement('script');
+                script.src = 'js/simulator.js';
+                script.onload = function() {
+                    log('✅ simulator.js loaded successfully', 'info');
+                    
+                    // Test if CavitySimulator class is available
+                    if (typeof CavitySimulator !== 'undefined') {
+                        log('✅ CavitySimulator class is available', 'info');
+                        
+                        try {
+                            const sim = new CavitySimulator();
+                            log('✅ CavitySimulator instance created successfully', 'info');
+                        } catch (error) {
+                            log(`❌ Error creating CavitySimulator: ${error.message}`, 'error');
+                        }
+                    } else {
+                        log('❌ CavitySimulator class not found', 'error');
+                    }
+                };
+                script.onerror = function() {
+                    log('❌ Failed to load simulator.js', 'error');
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                log(`❌ Error loading simulator: ${error.message}`, 'error');
+            }
+        }
+        
+        function testMain() {
+            log('Testing main.js and charts.js loading...', 'info');
+            try {
+                // Load charts.js first
+                const chartsScript = document.createElement('script');
+                chartsScript.src = 'js/charts.js';
+                chartsScript.onload = function() {
+                    log('✅ charts.js loaded successfully', 'info');
+                    
+                    // Then load main.js
+                    const mainScript = document.createElement('script');
+                    mainScript.src = 'js/main.js';
+                    mainScript.onload = function() {
+                        log('✅ main.js loaded successfully', 'info');
+                        
+                        // Test if app is available
+                        if (typeof window.app !== 'undefined') {
+                            log('✅ App instance is available', 'info');
+                        } else {
+                            log('❌ App instance not found', 'error');
+                        }
+                    };
+                    mainScript.onerror = function() {
+                        log('❌ Failed to load main.js', 'error');
+                    };
+                    document.head.appendChild(mainScript);
+                };
+                chartsScript.onerror = function() {
+                    log('❌ Failed to load charts.js', 'error');
+                };
+                document.head.appendChild(chartsScript);
+            } catch (error) {
+                log(`❌ Error loading scripts: ${error.message}`, 'error');
+            }
+        }
+        
+        log('Debug console ready. Click buttons to test components.', 'info');
+    </script>
+</body>
+</html>

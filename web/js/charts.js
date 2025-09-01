@@ -466,6 +466,17 @@ class ChartManager {
     }
     
     /**
+     * Resize all charts (needed for responsive layout)
+     */
+    resizeCharts() {
+        Object.values(this.charts).forEach(chart => {
+            if (chart && typeof chart.resize === 'function') {
+                chart.resize();
+            }
+        });
+    }
+    
+    /**
      * Destroy all charts
      */
     destroy() {

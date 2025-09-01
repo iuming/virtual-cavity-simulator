@@ -89,7 +89,7 @@ class VirtualCavityApp {
         this.elements.cavityPhaseDisplay = document.getElementById('cavityPhaseDisplay');
         
         // Other controls
-        this.elements.autoscaleSwitch = document.getElementById('autoscaleSwitch');
+        // this.elements.autoscaleSwitch = document.getElementById('autoscaleSwitch'); // TODO: Add to HTML
         this.elements.helpBtn = document.getElementById('helpBtn');
         
         // Check for missing elements

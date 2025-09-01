@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; }
+        #log { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Simple Component Test</h1>
+    <button onclick="testSimulator()">Test Simulator Only</button>
+    <button onclick="testWithCharts()">Test Simulator + Charts</button>
+    <button onclick="testFullApp()">Test Full App</button>
+    
+    <div id="log"></div>
+    
+    <script>
+        function log(msg) {
+            const div = document.getElementById('log');
+            div.innerHTML += '[' + new Date().toLocaleTimeString() + '] ' + msg + '<br>';
+            div.scrollTop = div.scrollHeight;
+            console.log(msg);
+        }
+        
+        function testSimulator() {
+            log('=== Testing Simulator Only ===');
+            try {
+                // Load simulator script
+                const script = document.createElement('script');
+                script.src = 'js/simulator.js';
+                script.onload = function() {
+                    log('✅ simulator.js loaded');
+                    
+                    try {
+                        const sim = new CavitySimulator();
+                        log('✅ CavitySimulator created');
+                        
+                        sim.start();
+                        log('✅ Simulator started');
+                        
+                        setTimeout(() => {
+                            if (sim.running) {
+                                log('✅ Simulator is running');
+                                log(`Data points: ${sim.data_buffer.length}`);
+                                if (sim.data_buffer.length > 0) {
+                                    const latest = sim.data_buffer[sim.data_buffer.length - 1];
+                                    log(`Latest voltage: ${latest.vc_magnitude} MV`);
+                                    log(`Latest power: ${latest.forward_power} kW`);
+                                }
+                            } else {
+                                log('❌ Simulator not running');
+                            }
+                            sim.stop();
+                            log('✅ Simulator stopped');
+                        }, 1000);
+                        
+                    } catch (error) {
+                        log('❌ Simulator error: ' + error.message);
+                    }
+                };
+                script.onerror = function() {
+                    log('❌ Failed to load simulator.js');
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                log('❌ Test error: ' + error.message);
+            }
+        }
+        
+        function testWithCharts() {
+            log('=== Testing Simulator + Charts ===');
+            // This will test if charts.js can load and work with simulator
+            // Implementation similar to testSimulator but with charts
+        }
+        
+        function testFullApp() {
+            log('=== Testing Full App ===');
+            // This will test the complete main.js application
+        }
+        
+        // Capture errors
+        window.addEventListener('error', function(e) {
+            log('❌ GLOBAL ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+        });
+        
+        log('Test page ready. Click buttons to test components.');
+    </script>
+</body>
+</html>

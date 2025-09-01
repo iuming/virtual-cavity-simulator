@@ -26,6 +26,7 @@ class CavitySimulator {
         // Simulation parameters (matching Python version)
         this.dt = 1e-6; // Time step (1 microsecond)
         this.f0 = 1.3e9; // Cavity resonant frequency (1.3 GHz)
+        this.omega0 = 2 * Math.PI * this.f0; // Angular frequency (rad/s)
         this.Q_loaded = 3e6; // Loaded quality factor
         this.R_over_Q = 1036; // R/Q value
         this.beta = 1e4; // Coupling coefficient (matching Python)
@@ -250,7 +251,7 @@ class CavitySimulator {
         // Cavity stored energy: U = |Vc|^2 / (2*R_cavity) * Q_loaded / ω0
         // This gives energy in Joules
         const vc_magnitude_squared = this.vc_complex.real**2 + this.vc_complex.imag**2;
-        const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * omega0); // Joules
+        const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * this.omega0); // Joules
         
         // Store data point
         const data_point = {
