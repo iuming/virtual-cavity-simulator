@@ -47,9 +47,15 @@ class ChartManager {
         const detuningChartElement = document.getElementById('detuningChart');
         const beamChartElement = document.getElementById('beamChart');
         
-        if (!voltageChartElement || !powerChartElement || !detuningChartElement || !beamChartElement) {
-            console.error('Chart elements not found in DOM');
-            throw new Error('Required chart canvas elements not found');
+        const missingElements = [];
+        if (!voltageChartElement) missingElements.push('voltageChart');
+        if (!powerChartElement) missingElements.push('powerChart');
+        if (!detuningChartElement) missingElements.push('detuningChart');
+        if (!beamChartElement) missingElements.push('beamChart');
+        
+        if (missingElements.length > 0) {
+            console.error('Chart elements not found in DOM:', missingElements);
+            throw new Error(`Required chart canvas elements not found: ${missingElements.join(', ')}`);
         }
         
         this.createVoltageChart();

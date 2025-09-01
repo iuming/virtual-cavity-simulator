@@ -50,11 +50,13 @@ jobs:
           if [ -d "web" ]; then
             cp -r web/* docs_build/
             echo "Web simulator copied to docs_build"
-            # Rename web simulator to avoid conflict
+            # Rename web simulator to avoid conflict, but keep it in the web structure
             if [ -f "docs_build/index.html" ]; then
               mv docs_build/index.html docs_build/simulator.html
               echo "Web simulator moved to simulator.html"
             fi
+            # Ensure web assets are accessible
+            ls -la docs_build/
           else
             echo "Web directory not found, creating placeholder"
           fi

@@ -91,6 +91,19 @@ class VirtualCavityApp {
         // Other controls
         this.elements.autoscaleSwitch = document.getElementById('autoscaleSwitch');
         this.elements.helpBtn = document.getElementById('helpBtn');
+        
+        // Check for missing elements
+        const missingElements = [];
+        Object.entries(this.elements).forEach(([key, element]) => {
+            if (!element) {
+                missingElements.push(key);
+            }
+        });
+        
+        if (missingElements.length > 0) {
+            console.warn('Missing DOM elements:', missingElements);
+            // Don't throw error, just log warning for optional elements
+        }
     }
     
     /**
@@ -98,59 +111,90 @@ class VirtualCavityApp {
      */
     setupEventListeners() {
         // Control buttons
-        this.elements.startBtn.addEventListener('click', () => this.startSimulation());
-        this.elements.stopBtn.addEventListener('click', () => this.stopSimulation());
-        this.elements.resetBtn.addEventListener('click', () => this.resetSimulation());
+        if (this.elements.startBtn) {
+            this.elements.startBtn.addEventListener('click', () => this.startSimulation());
+        }
+        if (this.elements.stopBtn) {
+            this.elements.stopBtn.addEventListener('click', () => this.stopSimulation());
+        }
+        if (this.elements.resetBtn) {
+            this.elements.resetBtn.addEventListener('click', () => this.resetSimulation());
+        }
         
         // Parameter sliders
-        this.elements.amplitudeSlider.addEventListener('input', (e) => {
-            this.elements.amplitudeValue.textContent = parseFloat(e.target.value).toFixed(2);
-            this.updateSimulatorParameters();
-        });
+        if (this.elements.amplitudeSlider && this.elements.amplitudeValue) {
+            this.elements.amplitudeSlider.addEventListener('input', (e) => {
+                this.elements.amplitudeValue.textContent = parseFloat(e.target.value).toFixed(2);
+                this.updateSimulatorParameters();
+            });
+        }
         
-        this.elements.phaseSlider.addEventListener('input', (e) => {
-            this.elements.phaseValue.textContent = e.target.value;
-            this.updateSimulatorParameters();
-        });
+        if (this.elements.phaseSlider && this.elements.phaseValue) {
+            this.elements.phaseSlider.addEventListener('input', (e) => {
+                this.elements.phaseValue.textContent = e.target.value;
+                this.updateSimulatorParameters();
+            });
+        }
         
-        this.elements.frequencySlider.addEventListener('input', (e) => {
-            this.elements.frequencyValue.textContent = e.target.value;
-            this.updateSimulatorParameters();
-        });
+        if (this.elements.frequencySlider && this.elements.frequencyValue) {
+            this.elements.frequencySlider.addEventListener('input', (e) => {
+                this.elements.frequencyValue.textContent = e.target.value;
+                this.updateSimulatorParameters();
+            });
+        }
         
-        this.elements.beamCurrentSlider.addEventListener('input', (e) => {
-            this.elements.beamCurrentValue.textContent = parseFloat(e.target.value).toFixed(3);
-            this.updateSimulatorParameters();
-        });
+        if (this.elements.beamCurrentSlider && this.elements.beamCurrentValue) {
+            this.elements.beamCurrentSlider.addEventListener('input', (e) => {
+                this.elements.beamCurrentValue.textContent = parseFloat(e.target.value).toFixed(3);
+                this.updateSimulatorParameters();
+            });
+        }
         
         // Mode selection
-        this.elements.cwMode.addEventListener('change', () => {
-            if (this.elements.cwMode.checked) {
-                this.simulator.setMode('cw');
-            }
-        });
+        if (this.elements.cwMode) {
+            this.elements.cwMode.addEventListener('change', () => {
+                if (this.elements.cwMode.checked) {
+                    this.simulator.setMode('cw');
+                }
+            });
+        }
         
-        this.elements.pulsedMode.addEventListener('change', () => {
-            if (this.elements.pulsedMode.checked) {
-                this.simulator.setMode('pulsed');
-            }
-        });
+        if (this.elements.pulsedMode) {
+            this.elements.pulsedMode.addEventListener('change', () => {
+                if (this.elements.pulsedMode.checked) {
+                    this.simulator.setMode('pulsed');
+                }
+            });
+        }
         
         // Data controls
-        this.elements.recordBtn.addEventListener('click', () => this.toggleRecording());
-        this.elements.exportBtn.addEventListener('click', () => this.showExportModal());
-        this.elements.clearDataBtn.addEventListener('click', () => this.clearData());
+        if (this.elements.recordBtn) {
+            this.elements.recordBtn.addEventListener('click', () => this.toggleRecording());
+        }
+        if (this.elements.exportBtn) {
+            this.elements.exportBtn.addEventListener('click', () => this.showExportModal());
+        }
+        if (this.elements.clearDataBtn) {
+            this.elements.clearDataBtn.addEventListener('click', () => this.clearData());
+        }
         
         // Autoscale
-        this.elements.autoscaleSwitch.addEventListener('change', (e) => {
-            this.chartManager.setAutoscale(e.target.checked);
-        });
+        if (this.elements.autoscaleSwitch) {
+            this.elements.autoscaleSwitch.addEventListener('change', (e) => {
+                this.chartManager.setAutoscale(e.target.checked);
+            });
+        }
         
         // Help button
-        this.elements.helpBtn.addEventListener('click', () => {
-            const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
-            helpModal.show();
-        });
+        if (this.elements.helpBtn) {
+            this.elements.helpBtn.addEventListener('click', () => {
+                const helpModal = document.getElementById('helpModal');
+                if (helpModal) {
+                    const modal = new bootstrap.Modal(helpModal);
+                    modal.show();
+                }
+            });
+        }
         
         // Window resize
         window.addEventListener('resize', () => {
