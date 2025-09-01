@@ -253,9 +253,9 @@ class CavitySimulator {
         const vr_magnitude = Math.sqrt(vr_real**2 + vr_imag**2);
         
         // Power calculations with corrected units
-        // For RF cavity: P = V^2 / (2*R) where R is the effective resistance
-        // Use R/Q relationship: R = (R/Q) * Q_loaded for total cavity resistance
-        const R_cavity = this.R_over_Q * this.Q_loaded; // Total cavity resistance (Ohms)
+        // CORRECTED: Match Python exactly - use R_cavity = R/Q * Q_loaded (without 0.5 factor)
+        // Python: R_cavity = self.roQ * self.QL
+        const R_cavity = this.R_over_Q * this.Q_loaded; // 1036 × 3e6 = 3.108e9 Ohms
         
         // Forward power: power delivered by the RF drive
         const vf_magnitude_squared = vf_real**2 + vf_imag**2;
@@ -265,10 +265,10 @@ class CavitySimulator {
         const vr_magnitude_squared = vr_real**2 + vr_imag**2;
         const reflected_power = vr_magnitude_squared / (2 * R_cavity) / 1000; // kW
         
-        // Cavity stored energy: U = |Vc|^2 / (2*R_cavity) * Q_loaded / ω0
-        // This gives energy in Joules
+        // Cavity stored energy: CORRECTED to match Python exactly
+        // Python: stored_energy = abs(self.vc)**2 * self.QL / (2 * R_cavity * 2 * np.pi * self.f0)
         const vc_magnitude_squared = this.vc_complex.real**2 + this.vc_complex.imag**2;
-        const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * this.omega0); // Joules
+        const stored_energy = vc_magnitude_squared * this.Q_loaded / (2 * R_cavity * 2 * Math.PI * this.f0); // Joules
         
         // Store data point
         const data_point = {
