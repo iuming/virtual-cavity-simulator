@@ -46,6 +46,13 @@ jobs:
       - name: Create documentation structure
         run: |
           mkdir -p docs_build
+          # Copy web application to docs_build if it exists
+          if [ -d "web" ]; then
+            cp -r web/* docs_build/
+            echo "Web simulator copied to docs_build"
+          else
+            echo "Web directory not found, creating placeholder"
+          fi
           
       - name: Generate project documentation
         run: |

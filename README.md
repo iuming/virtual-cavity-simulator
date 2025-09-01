@@ -8,7 +8,9 @@
 
 🌐 **Project Website**: [https://iuming.github.io/virtual-cavity-simulator/](https://iuming.github.io/virtual-cavity-simulator/)
 
-A comprehensive **Radio Frequency (RF) cavity simulation platform** with advanced graphical user interface for accelerator physics applications. Built on top of the LLRFLibsPy framework, this simulator provides real-time cavity dynamics visualization and analysis tools.
+🚀 **Web Simulator**: [Try the live web version](https://iuming.github.io/virtual-cavity-simulator/) - No installation required!
+
+A comprehensive **Radio Frequency (RF) cavity simulation platform** with advanced graphical user interface for accelerator physics applications. Available both as a desktop Python application and a web-based simulator that runs in your browser.
 
 ## 🌟 Features
 
@@ -39,6 +41,23 @@ A comprehensive **Radio Frequency (RF) cavity simulation platform** with advance
 - **Progress Tracking**: Real-time scan progress display
 
 ## 🚀 Quick Start
+
+### 🌐 Web Version (Recommended for Quick Testing)
+
+**No installation required!** Try the simulator directly in your browser:
+
+👉 **[Launch Web Simulator](https://iuming.github.io/virtual-cavity-simulator/)**
+
+Features:
+- Runs on any modern browser (desktop/mobile)
+- Real-time RF cavity simulation
+- Interactive parameter control
+- Data export (CSV/JSON)
+- Responsive design
+
+### 🖥️ Desktop Version (Full Features)
+
+For advanced research and maximum accuracy:
 
 ### Prerequisites
 
