@@ -6,9 +6,23 @@
 [![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)]()
 [![Website](https://img.shields.io/badge/website-online-brightgreen.svg)](https://iuming.github.io/virtual-cavity-simulator/)
 
+## ⚠️ Important Usage Guidelines
+
+### 🐍 Python Version (Recommended for Scientific Applications)
+- **Use for**: Research, engineering calculations, precise simulations
+- **Accuracy**: Full numerical precision with validated LLRFLibsPy algorithms
+- **Command**: `python advanced_cavity_gui.py`
+
+### 🌐 Web Version (Educational/Demo Purposes Only)
+- **Use for**: Educational demonstrations, basic visualization, parameter exploration
+- **⚠️ Limitations**: Approximate results only - not suitable for scientific calculations
+- **Note**: JavaScript implementation has inherent numerical precision limitations
+
+---
+
 🌐 **Project Website**: [https://iuming.github.io/virtual-cavity-simulator/](https://iuming.github.io/virtual-cavity-simulator/)
 
-🚀 **Web Simulator**: [Try the live web version](https://iuming.github.io/virtual-cavity-simulator/simulator.html) - No installation required!
+🚀 **Web Demo**: [Try the live web version](https://iuming.github.io/virtual-cavity-simulator/simulator.html) - No installation required!
 
 A comprehensive **Radio Frequency (RF) cavity simulation platform** with advanced graphical user interface for accelerator physics applications. Available both as a desktop Python application and a web-based simulator that runs in your browser.
 

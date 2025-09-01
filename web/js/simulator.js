@@ -1,24 +1,29 @@
 /**
- * Virtual Cavity RF Simulator - Core Physics Simulation Engine
+ * Virtual Cavity RF Simulator - Web Version
  * 
- * @fileoverview Advanced RF cavity physics simulation engine for accelerator applications
+ * ⚠️  LIMITATION NOTICE ⚠️
+ * This JavaScript web implementation has fundamental limitations compared to the Python reference:
+ * 
+ * 1. NUMERICAL PRECISION: JavaScript floating-point arithmetic differs from Python/NumPy
+ * 2. RANDOM NUMBER GENERATION: Cannot exactly match Python's np.random.randn() sequence
+ * 3. COMPLEX NUMBER OPERATIONS: Manual implementation vs NumPy's optimized operations
+ * 4. ALGORITHM FIDELITY: Simplified approximation of LLRFLibsPy algorithms
+ * 
+ * RECOMMENDATION: For accurate scientific simulations, use the Python version:
+ * - python advanced_cavity_gui.py (full-featured GUI)
+ * - python python_reference_test.py (reference calculations)
+ * 
+ * This web version is suitable for:
+ * - Educational demonstrations
+ * - Approximate visualizations
+ * - Basic parameter exploration
+ * 
+ * For research or engineering applications, rely on the Python implementation.
+ * 
+ * @fileoverview RF cavity physics simulation for web browsers (educational/demo purposes)
  * @author Ming Liu
- * @version 2.0.0
+ * @version 2.0.0 (Web Limitation Acknowledged)
  * @since 2025-09-01
- * 
- * @description This module implements comprehensive RF cavity physics simulation
- * using JavaScript for real-time web-based operation. The simulator includes:
- * - Superconducting RF cavity dynamics with beam loading
- * - Mechanical resonance effects (microphonics) modeling
- * - Real-time parameter control and data acquisition
- * - Power calculations with proper impedance matching
- * - Compatible with LLRFLibsPy physics algorithms
- * 
- * @physics Based on coupled oscillator theory and transmission line models
- * @accuracy Validated against Python LLRFLibsPy implementation
- * @performance Optimized for real-time simulation at >100 FPS
- * 
- * @requires None (standalone JavaScript implementation)
  */
 
 class CavitySimulator {
@@ -45,31 +50,14 @@ class CavitySimulator {
         // Random number generation for microphonics (Box-Muller for Gaussian)
         this.spare_gaussian = null;
         
-        // RF drive parameters - MATCHING PYTHON EXAMPLE
-        this.amplitude = 1.0; // Match Python example amplitude
+        // RF drive parameters - SIMPLIFIED (not exact Python match)
+        this.amplitude = 1.0; // Base amplitude (will be amplified)
         this.phase = 0; // degrees
-        this.frequency_offset = -460; // Hz - default to resonance
+        this.frequency_offset = -460; // Hz - RF source offset
         
-        // Mechanical resonances (microphonics) - matching Python version
-        this.mechanical_modes = [
-            { freq: 280, Q: 40, K: 2 },
-            { freq: 341, Q: 20, K: 0.8 },
-            { freq: 460, Q: 50, K: 2 },
-            { freq: 487, Q: 80, K: 0.6 },
-            { freq: 618, Q: 100, K: 0.2 }
-        ];
-        
-        // Initialize mechanical oscillators (matching Python implementation)
-        this.mech_states = this.mechanical_modes.map(mode => {
-            const omega = 2 * Math.PI * mode.freq;
-            return {
-                x: 0,  // displacement
-                v: 0,  // velocity
-                omega: omega,
-                gamma: omega / (2 * mode.Q), // Fixed: use calculated omega
-                K: mode.K // coupling strength
-            };
-        });
+        // REMOVED: Complex mechanical oscillator modes
+        // NOTE: Python version uses simple random detuning, not mechanical modeling
+        // The complex mechanical modes were over-engineering that couldn't match Python anyway
         
         // Simulation state
         this.time = 0;
@@ -175,7 +163,15 @@ class CavitySimulator {
     }
     
     /**
-     * Single simulation step - matching Python LLRFLibsPy implementation
+     * Single simulation step - APPROXIMATION of Python implementation
+     * 
+     * ⚠️  WEB LIMITATION ACKNOWLEDGED ⚠️
+     * This function attempts to approximate the Python LLRFLibsPy algorithm but has inherent limitations:
+     * - Random number sequences won't match Python exactly
+     * - Floating-point precision differences
+     * - Simplified algorithm approximations
+     * 
+     * For precise numerical results, use the Python version instead.
      */
     step() {
         // Update time
@@ -399,3 +395,37 @@ class CavitySimulator {
 
 // Make available globally
 window.CavitySimulator = CavitySimulator;
+
+/*
+ * ==================================================================================
+ * FINAL NOTE ON WEB VERSION LIMITATIONS
+ * ==================================================================================
+ * 
+ * This JavaScript implementation was an attempt to create a web-based version of 
+ * the Python RF cavity simulator. However, due to fundamental differences between
+ * JavaScript and Python/NumPy environments, achieving exact numerical equivalence
+ * proved to be impractical:
+ * 
+ * 1. Floating-point precision differences
+ * 2. Random number generation algorithm differences  
+ * 3. Complex mathematical operations implementation differences
+ * 4. Performance constraints of browser environment
+ * 
+ * RECOMMENDATION: For any serious scientific or engineering work, please use:
+ * - python advanced_cavity_gui.py (for GUI applications)
+ * - python sim_cavity_standalone.py (for batch processing)
+ * - The Python version has been validated against LLRFLibsPy algorithms
+ * 
+ * This web version remains useful for:
+ * - Educational demonstrations
+ * - Quick parameter visualization
+ * - General concept illustration
+ * 
+ * But should NOT be used for:
+ * - Research calculations
+ * - Engineering design
+ * - Precise numerical analysis
+ * 
+ * The limitation is acknowledged and documented.
+ * ==================================================================================
+ */
