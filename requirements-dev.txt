@@ -1,0 +1,48 @@
+# Development dependencies for Virtual Cavity RF Simulator
+
+# Core dependencies (also in requirements.txt)
+numpy>=1.19.0
+matplotlib>=3.3.0
+
+# Development tools
+pytest>=6.0.0                # Testing framework
+pytest-cov>=2.10.0          # Coverage testing
+pytest-mock>=3.6.0          # Mocking for tests
+pytest-xvfb>=2.0.0          # Virtual display for GUI testing
+
+# Code formatting and linting
+black>=21.0.0                # Code formatter
+isort>=5.9.0                 # Import sorter
+flake8>=3.9.0               # Linting
+mypy>=0.910                  # Type checking
+
+# Documentation
+sphinx>=4.0.0               # Documentation generator
+sphinx-rtd-theme>=0.5.0     # ReadTheDocs theme
+sphinx-autodoc-typehints>=1.12.0  # Type hints in docs
+
+# Development utilities
+pre-commit>=2.15.0          # Git hooks
+twine>=3.4.0                # Package uploading
+wheel>=0.37.0               # Wheel building
+setuptools>=57.0.0          # Package building
+
+# Jupyter notebooks (for examples and development)
+jupyter>=1.0.0              # Jupyter notebooks
+ipywidgets>=7.6.0           # Interactive widgets
+nbformat>=5.1.0             # Notebook format
+
+# Performance profiling
+cProfile                     # Built-in profiler
+line_profiler>=3.3.0        # Line-by-line profiling
+memory_profiler>=0.60.0     # Memory usage profiling
+
+# Optional GUI testing (if available)
+pytest-qt>=4.0.0           # Qt GUI testing (optional)
+
+# Code quality tools
+bandit>=1.7.0               # Security linting
+safety>=1.10.0              # Dependency vulnerability scanning
+
+# Version management
+bump2version>=1.0.0         # Version bumping tool

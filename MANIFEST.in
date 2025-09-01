@@ -1,0 +1,61 @@
+# Manifest file for Virtual Cavity RF Simulator package distribution
+
+# Include important documentation files
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+
+# Include requirements files
+include requirements.txt
+include requirements-dev.txt
+
+# Include configuration files
+include setup.py
+include .gitignore
+include MANIFEST.in
+
+# Include documentation directory
+recursive-include docs *.md *.rst *.txt *.png *.jpg *.svg
+recursive-include docs *.py *.yml *.yaml
+
+# Include examples directory
+recursive-include examples *.py *.md *.txt *.yml *.yaml
+
+# Include tests directory
+recursive-include tests *.py *.txt *.yml *.yaml
+
+# Include any data files
+recursive-include data *.txt *.csv *.json *.yml *.yaml
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__/*
+global-exclude .git/*
+global-exclude .gitignore
+global-exclude *.log
+global-exclude *.tmp
+global-exclude *.bak
+global-exclude *~
+
+# Exclude development and build artifacts
+global-exclude build/*
+global-exclude dist/*
+global-exclude *.egg-info/*
+global-exclude .pytest_cache/*
+global-exclude .coverage
+global-exclude htmlcov/*
+global-exclude .mypy_cache/*
+global-exclude .tox/*
+
+# Exclude IDE files
+global-exclude .vscode/*
+global-exclude .idea/*
+global-exclude *.sublime-project
+global-exclude *.sublime-workspace
+
+# Exclude OS files
+global-exclude .DS_Store
+global-exclude Thumbs.db
+global-exclude *.lnk

@@ -1,0 +1,4 @@
+pythonSoftIOC
+matplotlib
+tkinter
+# LLRFLibsPy 需手动安装或从源码引入，如有问题请参考其 GitHub
