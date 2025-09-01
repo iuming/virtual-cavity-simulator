@@ -162,10 +162,11 @@ class CavitySimulator {
         let vf_real = 0, vf_imag = 0;
         
         if (this.mode === 'cw' || (this.mode === 'pulsed' && Math.sin(2 * Math.PI * this.time * 50) > 0)) {
-            // Apply gain similar to Python version
-            const gain_factor = Math.pow(10, 20 * Math.log10(12e6) / 20.0 / 20.0); // Simplified gain
-            vf_real = this.amplitude * gain_factor * Math.cos(this.phase);
-            vf_imag = this.amplitude * gain_factor * Math.sin(this.phase);
+            // Simplified gain factor to avoid numerical issues
+            const gain_factor = 1e6; // Direct scaling factor (1 MV)
+            const phase_rad = this.phase * Math.PI / 180; // Convert degrees to radians
+            vf_real = this.amplitude * gain_factor * Math.cos(phase_rad);
+            vf_imag = this.amplitude * gain_factor * Math.sin(phase_rad);
         }
         
         // Beam loading voltage (matching Python: vb = -RL * beam_current)
@@ -216,7 +217,7 @@ class CavitySimulator {
             detuning: this.detuning,
             beam_current: this.beam_current,
             amplitude: this.amplitude,
-            phase: this.phase * 180 / Math.PI
+            phase: this.phase // Already in degrees
         };
         
         // Add to buffer

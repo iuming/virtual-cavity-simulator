@@ -7,19 +7,29 @@
 
 class VirtualCavityApp {
     constructor() {
-        this.simulator = new CavitySimulator();
-        this.chartManager = new ChartManager();
-        
-        // UI elements
-        this.elements = {};
-        this.lastUpdateTime = 0;
-        this.updateThrottle = 50; // ms
-        
-        this.initializeUI();
-        this.setupEventListeners();
-        this.setupSimulatorCallbacks();
-        
-        console.log('Virtual Cavity RF Simulator initialized');
+        try {
+            console.log('Creating simulator...');
+            this.simulator = new CavitySimulator();
+            console.log('Creating chart manager...');
+            this.chartManager = new ChartManager();
+            
+            // UI elements
+            this.elements = {};
+            this.lastUpdateTime = 0;
+            this.updateThrottle = 50; // ms
+            
+            console.log('Initializing UI...');
+            this.initializeUI();
+            console.log('Setting up event listeners...');
+            this.setupEventListeners();
+            console.log('Setting up simulator callbacks...');
+            this.setupSimulatorCallbacks();
+            
+            console.log('Virtual Cavity RF Simulator initialized successfully');
+        } catch (error) {
+            console.error('Error in VirtualCavityApp constructor:', error);
+            throw error;
+        }
     }
     
     /**
@@ -424,12 +434,29 @@ class VirtualCavityApp {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new VirtualCavityApp();
-    
-    // Show welcome message
-    setTimeout(() => {
-        window.app.updateStatus('Ready to start simulation');
-    }, 1000);
+    try {
+        console.log('Initializing Virtual Cavity App...');
+        window.app = new VirtualCavityApp();
+        console.log('App initialized successfully');
+        
+        // Show welcome message
+        setTimeout(() => {
+            window.app.updateStatus('Ready to start simulation');
+        }, 1000);
+    } catch (error) {
+        console.error('Failed to initialize app:', error);
+        
+        // Show error message to user
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger position-fixed top-0 start-50 translate-middle-x mt-3';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.innerHTML = `
+            <h6>Initialization Error</h6>
+            <p>Failed to load the simulator. Please check the browser console for details.</p>
+            <small>Error: ${error.message}</small>
+        `;
+        document.body.appendChild(errorDiv);
+    }
 });
 
 // Handle page visibility change to pause/resume simulation

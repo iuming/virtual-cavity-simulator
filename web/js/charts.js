@@ -28,6 +28,16 @@ class ChartManager {
      * Initialize all charts
      */
     initializeCharts() {
+        // Check if DOM elements exist before creating charts
+        const mainChartElement = document.getElementById('mainChart');
+        const voltageChartElement = document.getElementById('voltageChart');
+        const reflectedChartElement = document.getElementById('reflectedChart');
+        
+        if (!mainChartElement || !voltageChartElement || !reflectedChartElement) {
+            console.error('Chart elements not found in DOM');
+            throw new Error('Required chart canvas elements not found');
+        }
+        
         this.createMainChart();
         this.createVoltageChart();
         this.createReflectedChart();
@@ -37,9 +47,13 @@ class ChartManager {
      * Create main real-time chart
      */
     createMainChart() {
-        const ctx = document.getElementById('mainChart').getContext('2d');
+        const ctx = document.getElementById('mainChart');
+        if (!ctx) {
+            console.error('mainChart element not found');
+            return;
+        }
         
-        this.charts.main = new Chart(ctx, {
+        this.charts.main = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
                 datasets: [
@@ -146,9 +160,13 @@ class ChartManager {
      * Create voltage magnitude and phase chart
      */
     createVoltageChart() {
-        const ctx = document.getElementById('voltageChart').getContext('2d');
+        const ctx = document.getElementById('voltageChart');
+        if (!ctx) {
+            console.error('voltageChart element not found');
+            return;
+        }
         
-        this.charts.voltage = new Chart(ctx, {
+        this.charts.voltage = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
                 datasets: [
@@ -226,9 +244,13 @@ class ChartManager {
      * Create reflected power chart
      */
     createReflectedChart() {
-        const ctx = document.getElementById('reflectedChart').getContext('2d');
+        const ctx = document.getElementById('reflectedChart');
+        if (!ctx) {
+            console.error('reflectedChart element not found');
+            return;
+        }
         
-        this.charts.reflected = new Chart(ctx, {
+        this.charts.reflected = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: {
                 datasets: [
