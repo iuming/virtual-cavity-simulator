@@ -32,6 +32,11 @@ class CavitySimulator {
         this.beta = 1e4; // Coupling coefficient (matching Python)
         this.RL = 0.5 * this.R_over_Q * this.Q_loaded; // Load resistance
         
+        // RF amplifier gain (CRITICAL: matching Python implementation)
+        // Python: gain_dB = 20 * log10(12e6) ≈ 142 dB
+        this.gain_dB = 20 * Math.log10(12e6); // Amplifier gain in dB
+        this.gain_linear = Math.pow(10, this.gain_dB / 20); // Convert to linear gain
+        
         // Cavity state variables
         this.vc_complex = { real: 0, imag: 0 }; // Cavity voltage (complex)
         this.detuning = 0; // Frequency detuning (Hz)
@@ -195,9 +200,15 @@ class CavitySimulator {
             // Total phase
             const total_phase = static_phase + freq_phase;
             
-            // Use same voltage scale as Python (internal calculation in Volts)
-            vf_real = this.amplitude * Math.cos(total_phase);
-            vf_imag = this.amplitude * Math.sin(total_phase);
+            // Base RF signal (matching Python amplitude)
+            const base_real = this.amplitude * Math.cos(total_phase);
+            const base_imag = this.amplitude * Math.sin(total_phase);
+            
+            // Apply amplifier gain (CRITICAL: matching Python sim_amp function)
+            // Python: S2 = sim_amp(S1, params['gain_dB'])
+            // where sim_amp(sig_in, gain_dB) = sig_in * 10.0**(gain_dB / 20.0)
+            vf_real = base_real * this.gain_linear;
+            vf_imag = base_imag * this.gain_linear;
         }
         
         // Beam loading voltage (matching Python: vb = -RL * beam_current)
